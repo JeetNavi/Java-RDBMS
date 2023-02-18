@@ -1,12 +1,16 @@
 package ed.inf.adbs.minibase;
 
-import ed.inf.adbs.minibase.base.Atom;
-import ed.inf.adbs.minibase.base.Query;
-import ed.inf.adbs.minibase.base.Head;
+import ed.inf.adbs.minibase.base.*;
 import ed.inf.adbs.minibase.parser.QueryParser;
+import ed.inf.adbs.minibase.parser.generated.MinibaseParser;
+//import jdk.javadoc.internal.doclets.formats.html.markup.BodyContents;
 
+import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+
+import java.util.HashMap;
 
 /**
  *
@@ -25,9 +29,9 @@ public class CQMinimizer {
         String inputFile = args[0];
         String outputFile = args[1];
 
-//        minimizeCQ(inputFile, outputFile);
+        minimizeCQ(inputFile, outputFile);
 
-        parsingExample(inputFile);
+        //parsingExample(inputFile);
     }
 
     /**
@@ -37,33 +41,80 @@ public class CQMinimizer {
      * but could potentially have constants in its relational atoms.
      *
      */
-    public static void minimizeCQ(String inputFile, String outputFile) {
-        // TODO: add your implementation
+    public static void minimizeCQ(String inputFile, String outputFile) throws IOException {
 
-        Query originalCQ;
-        Head originalCQHead = null;
-        List<Atom> originalCQBody = null;
+        Query CQ = QueryParser.parse(Paths.get(inputFile));
+        List<Atom> CQBody = CQ.getBody();
 
-        try {
-            originalCQ = QueryParser.parse(Paths.get(inputFile));
-            originalCQHead = originalCQ.getHead();
-            originalCQBody = originalCQ.getBody();
-        }
+        Query tempCQ = QueryParser.parse(Paths.get(inputFile));
+        List<Atom> tempCQBody = tempCQ.getBody();
 
-        catch (Exception e)
+        assert CQBody != null;
+        boolean changesMade = true;
 
-        {
-            System.err.println("Exception occurred during parsing");
-            e.printStackTrace();
-        }
 
-        assert originalCQBody != null;
+        while (changesMade){
 
-        for (Atom rawAtom : originalCQBody) {
-
+            for (Atom atom : CQBody) {
+                tempCQBody.remove(atom);
+                if (isQueryHomomorphism(CQ, tempCQ, atom)) {
+                    CQBody.remove(atom);
+                    changesMade = true;
+                    break;
+                } else {
+                    tempCQBody.add(atom);
+                    changesMade = false;
+                }
+            }
         }
 
     }
+
+    public static boolean isQueryHomomorphism(Query from, Query to, Atom removedAtom){
+
+        List<Term> headVars = new ArrayList<>(from.getHead().getVariables());
+        String relationName = removedAtom.getRelationName();
+
+        HashMap<Term, Term> mapping = new HashMap<>();
+
+        int termCounter = 0;
+
+        for (Term term : removedAtom.getAtomTerms()) {
+            if (!(headVars.contains(term)) && (term instanceof Variable)) {
+                for (Atom atom : to.getBody()) {
+                    if (atom.getRelationName().equals(relationName)) {
+                        mapping.put(term, atom.getAtomTerms().get(termCounter));
+                        if (isContained(from.getBody(), to.getBody(), mapping)) {
+                            return true;
+                        } else {
+                            mapping.remove(term);
+                        }
+                    }
+                }
+            }
+            termCounter += 1;
+        }
+
+        return false;
+    }
+
+    private static boolean isContained(List<Atom> fromBody, List<Atom> toBody, HashMap<Term, Term> mapping) {
+
+        List<Atom> mappedBody = new ArrayList<>();
+
+        for (Atom atom : fromBody){
+            for (Term term : atom.getAtomTerms()){
+                List<Term> mappedTerms = new ArrayList<>();
+                mappedTerms.add(mapping.getOrDefault(term, term));
+            }
+
+
+            for (Atom toAtom : toBody){
+
+            }
+        }
+    }
+
 
     /**
      * Example method for getting started with the parser.
