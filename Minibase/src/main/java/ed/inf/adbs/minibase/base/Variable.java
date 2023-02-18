@@ -15,4 +15,8 @@ public class Variable extends Term {
     public String toString() {
         return name;
     }
+
+    public boolean equals(Variable v){
+        return this.name.equals(v.name);
+    }
 }
