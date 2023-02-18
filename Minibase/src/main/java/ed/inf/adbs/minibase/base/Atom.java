@@ -1,9 +1,6 @@
 package ed.inf.adbs.minibase.base;
 
-import org.w3c.dom.ls.LSException;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Atom {
 
@@ -34,6 +31,5 @@ public class Atom {
         return terms;
 
     }
-
 
 }

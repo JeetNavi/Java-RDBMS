@@ -2,15 +2,9 @@ package ed.inf.adbs.minibase;
 
 import ed.inf.adbs.minibase.base.*;
 import ed.inf.adbs.minibase.parser.QueryParser;
-import ed.inf.adbs.minibase.parser.generated.MinibaseParser;
-//import jdk.javadoc.internal.doclets.formats.html.markup.BodyContents;
 
-import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.HashMap;
+import java.util.*;
 
 /**
  *
@@ -30,8 +24,6 @@ public class CQMinimizer {
         String outputFile = args[1];
 
         minimizeCQ(inputFile, outputFile);
-
-        //parsingExample(inputFile);
     }
 
     /**
@@ -41,80 +33,106 @@ public class CQMinimizer {
      * but could potentially have constants in its relational atoms.
      *
      */
-    public static void minimizeCQ(String inputFile, String outputFile) throws IOException {
+    public static void minimizeCQ(String inputFile, String outputFile) {
 
-        Query CQ = QueryParser.parse(Paths.get(inputFile));
-        List<Atom> CQBody = CQ.getBody();
+        Query query = parseQuery(inputFile);
+        Query tempQuery = parseQuery(inputFile);
+        assert query != null;
+        assert tempQuery != null;
+        List<Atom> body = query.getBody();
+        List<Atom> tempBody = tempQuery.getBody();
 
-        Query tempCQ = QueryParser.parse(Paths.get(inputFile));
-        List<Atom> tempCQBody = tempCQ.getBody();
-
-        assert CQBody != null;
         boolean changesMade = true;
-
 
         while (changesMade){
 
-            for (Atom atom : CQBody) {
-                tempCQBody.remove(atom);
-                if (isQueryHomomorphism(CQ, tempCQ, atom)) {
-                    CQBody.remove(atom);
+            for (Atom atom : body) {
+                if (isContained(query, tempQuery, atom)) {
+                    body.remove(atom);
                     changesMade = true;
                     break;
                 } else {
-                    tempCQBody.add(atom);
                     changesMade = false;
                 }
             }
         }
-
     }
 
-    public static boolean isQueryHomomorphism(Query from, Query to, Atom removedAtom){
+    private static boolean isContained(Query query, Query tempQuery, Atom removeAtom) {
+        List<Atom> body = query.getBody();
+        List<Atom> tempBody = tempQuery.getBody();
+        Head head = query.getHead();
+        Head tempHead = tempQuery.getHead();
 
-        List<Term> headVars = new ArrayList<>(from.getHead().getVariables());
-        String relationName = removedAtom.getRelationName();
+        tempBody.remove(removeAtom);
+        List<Term> removedAtomTerms = removeAtom.getAtomTerms();
 
-        HashMap<Term, Term> mapping = new HashMap<>();
+        List<Variable> headVariables = head.getVariables();
 
-        int termCounter = 0;
+        // Check body is not empty.
+        // Check if the output variables still exist in body.
+        // Check if output variable is preserved. (This is always the case, no need to check).
+        // Check subset -> True
+        // Else, if there exists a mapping -> True else False.
+        // MAPPING CHECK: For every term in removedAtom, if term in head, return False.
+        //                                               Else, if Const, check Const appears in same position in diff atom with same relation name -> If not then return False.
+        //                                               Else if Variable, map to other positionally equivalent variables. Check if new Atom exists in toBody. -> True.
+        //                                                  If false for all positionally equivalent variables, return False. (use hashmap from relationname to position)
 
-        for (Term term : removedAtom.getAtomTerms()) {
-            if (!(headVars.contains(term)) && (term instanceof Variable)) {
-                for (Atom atom : to.getBody()) {
-                    if (atom.getRelationName().equals(relationName)) {
-                        mapping.put(term, atom.getAtomTerms().get(termCounter));
-                        if (isContained(from.getBody(), to.getBody(), mapping)) {
-                            return true;
-                        } else {
-                            mapping.remove(term);
-                        }
+        // Check body is not empty.
+        if (tempBody.size() == 0){
+            return false;
+        }
+
+        // Check if the output variables still exist in body.
+        for (Variable headVariable : headVariables){
+            boolean varExistsInBody = false;
+            CheckAllAtoms:
+            for (Atom atom : tempBody){
+                for (Term term : atom.getAtomTerms()){
+                    if (term.equals(headVariable)){
+                        varExistsInBody = true;
+                        break CheckAllAtoms;
                     }
                 }
             }
-            termCounter += 1;
-        }
-
-        return false;
-    }
-
-    private static boolean isContained(List<Atom> fromBody, List<Atom> toBody, HashMap<Term, Term> mapping) {
-
-        List<Atom> mappedBody = new ArrayList<>();
-
-        for (Atom atom : fromBody){
-            for (Term term : atom.getAtomTerms()){
-                List<Term> mappedTerms = new ArrayList<>();
-                mappedTerms.add(mapping.getOrDefault(term, term));
-            }
-
-
-            for (Atom toAtom : toBody){
-
+            if (!varExistsInBody){
+                return false;
             }
         }
-    }
 
+        // Check subset -> True
+        // Check if all atoms in longer body appear in shorter body.
+        boolean allAtomsFound = true;
+        for (Atom atom : body){
+            if (!tempBody.contains(atom)){
+                allAtomsFound = false;
+                break;
+            }
+        }
+        if (allAtomsFound){
+            return true;
+        }
+
+        // Check for possible mapping.
+        int position = 0;
+        HashMap<Term, Term> mapping = new HashMap<>();
+        String removedAtomRelationName = removeAtom.getRelationName();
+        for (Atom atom : tempBody){
+            if (atom.getRelationName().equals(removedAtomRelationName)){
+                List<Term> atomTerms = atom.getAtomTerms();
+                for (Term term : removedAtomTerms){
+                    if (term instanceof Variable){
+                        mapping.put(term, atomTerms.get(position));
+                    }
+                }
+                for (Atom a : body){
+
+                }
+                Query potentialQuery = new Query(head, );
+            }
+        }
+    }
 
     /**
      * Example method for getting started with the parser.
@@ -122,23 +140,18 @@ public class CQMinimizer {
      * from the query and prints them to screen.
      */
 
-    public static void parsingExample(String filename) {
+    public static Query parseQuery(String filename) {
 
         try {
-            //Query query = QueryParser.parse(Paths.get(filename));
-             Query query = QueryParser.parse("Q(x, y) :- R(x, z), S(y, z, w)");
+            return QueryParser.parse(Paths.get(filename));
+            // Query query = QueryParser.parse("Q(x, y) :- R(x, z), S(y, z, w)");
             // Query query = QueryParser.parse("Q(x) :- R(x, 'z'), S(4, z, w)");
-
-            System.out.println("Entire query: " + query);
-            Head head = query.getHead();
-            System.out.println("Head: " + head);
-            List<Atom> body = query.getBody();
-            System.out.println("Body: " + body);
         }
         catch (Exception e)
         {
             System.err.println("Exception occurred during parsing");
             e.printStackTrace();
         }
+        return null; // This should never be returned unless the query is invalid.
     }
 }
