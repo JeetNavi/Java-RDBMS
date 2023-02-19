@@ -3,6 +3,8 @@ package ed.inf.adbs.minibase;
 import ed.inf.adbs.minibase.base.*;
 import ed.inf.adbs.minibase.parser.QueryParser;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +32,16 @@ public class CQMinimizer {
 
         Query minimizedCQ = minimizeCQ(CQ);
 
-        System.out.println(minimizedCQ.toString());
+        //System.out.println(minimizedCQ.toString());
 
+        try {
+            FileWriter myWriter = new FileWriter(outputFile);
+            myWriter.write(minimizedCQ.toString());
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to file.");
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -68,7 +78,7 @@ public class CQMinimizer {
     private static boolean isQueryHomo(Head queryHead, List<RelationalAtom> queryBody, RelationalAtom atomToRemove) {
 
         HashMap<Term, Term> mapping = new HashMap<>();
-        int termCounter = -1;
+        int termCounter;
 
         for (Variable headVariable : queryHead.getVariables()) {
             mapping.put(headVariable, headVariable);
@@ -162,10 +172,10 @@ public class CQMinimizer {
     public static Query parseQuery(String filename) {
 
         try {
-            //return QueryParser.parse(Paths.get(filename));
+            return QueryParser.parse(Paths.get(filename));
             //return QueryParser.parse("Q(x, y) :- R(x, z), S(y, z, w)");
             //return QueryParser.parse("Q(x) :- R(x, 'z'), S(4, z, w)");
-            return QueryParser.parse("Q(x) :- P(x,a), P(a,a), T(b,b,x), T(z,z,a)");
+            //return QueryParser.parse("Q(x) :- P(x,a), P(x,a), T(b,b,x), T(z,z,a)");
         }
         catch (Exception e)
         {
