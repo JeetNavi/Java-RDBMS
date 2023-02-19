@@ -11,12 +11,12 @@ public class Variable extends Term {
         return name;
     }
 
+    public boolean equals (Variable v) {
+        return v.name.equals(this.name);
+    }
+
     @Override
     public String toString() {
         return name;
-    }
-
-    public boolean equals(Variable v){
-        return this.name.equals(v.name);
     }
 }

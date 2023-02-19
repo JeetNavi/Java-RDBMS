@@ -29,6 +29,15 @@ public class Head {
         return agg;
     }
 
+    public boolean containsVariable(Variable v){
+        for (Variable variable : variables) {
+            if (variable.equals(v)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         if (agg == null) {

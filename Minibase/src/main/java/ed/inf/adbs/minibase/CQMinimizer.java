@@ -3,10 +3,10 @@ package ed.inf.adbs.minibase;
 import ed.inf.adbs.minibase.base.*;
 import ed.inf.adbs.minibase.parser.QueryParser;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -25,7 +25,13 @@ public class CQMinimizer {
         String inputFile = args[0];
         String outputFile = args[1];
 
-        minimizeCQ(inputFile, outputFile);
+        Query CQ = parseQuery(inputFile);
+        assert CQ != null;
+
+        Query minimizedCQ = minimizeCQ(CQ);
+
+        System.out.println(minimizedCQ.toString());
+
     }
 
     /**
@@ -35,182 +41,116 @@ public class CQMinimizer {
      * but could potentially have constants in its relational atoms.
      *
      */
-    public static void minimizeCQ(String inputFile, String outputFile) {
-
-        Query query = parseQuery(inputFile);
-        Query tempQuery = parseQuery(inputFile);
-        assert query != null;
-        assert tempQuery != null;
-        List<Atom> body = query.getBody();
+    public static Query minimizeCQ(Query query) {
 
         boolean changesMade = true;
+        Head queryHead = query.getHead();
+        List<RelationalAtom> queryBody = new ArrayList<>();
 
-        while (changesMade){
+        for (Atom a : query.getBody()) {
+            queryBody.add((RelationalAtom) a);
+        }
 
-            for (Atom atom : body) {
-                if (isContained(query, tempQuery, atom)) {
-                    body.remove(atom);
+        while (changesMade) {
+            changesMade = false;
+            for (RelationalAtom atom : queryBody) {
+                if (isQueryHomo(queryHead, queryBody, new RelationalAtom(atom.getName(), atom.getTerms()))) {
                     changesMade = true;
+                    queryBody.remove(atom);
+                    query.removeFromBody(atom);
                     break;
-                } else {
-                    changesMade = false;
                 }
             }
         }
-
-        System.out.println(query.toString());
-
-        try {
-            FileWriter myWriter = new FileWriter(outputFile);
-            myWriter.write(query.toString());
-            myWriter.close();
-            System.out.println("Successfully wrote to the file.");
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
+        return query;
     }
 
-    private static boolean isContained(Query query, Query tempQuery, Atom removeAtom) {
+    private static boolean isQueryHomo(Head queryHead, List<RelationalAtom> queryBody, RelationalAtom atomToRemove) {
 
-        Head head = query.getHead();
-        Head tempHead = tempQuery.getHead();
-        List<RelationalAtom> body = new ArrayList<>();
-        List<RelationalAtom> tempBody = new ArrayList<>();
+        HashMap<Term, Term> mapping = new HashMap<>();
+        int termCounter = -1;
 
-        for (Atom atom : query.getBody()){
-            body.add((RelationalAtom) atom);
-            tempBody.add((RelationalAtom) atom);
+        for (Variable headVariable : queryHead.getVariables()) {
+            mapping.put(headVariable, headVariable);
         }
 
-        tempBody.remove((RelationalAtom) removeAtom);
-        RelationalAtom removedAtom = (RelationalAtom) removeAtom;
-
-        List<Term> removedAtomTerms = removedAtom.getTerms();
-        List<Variable> headVariables = head.getVariables();
-
-        // Check body is not empty.
-        if (tempBody.size() == 0){
-            return false;
-        }
-
-        // Check if the output variables still exist in body.
-        for (Variable headVariable : headVariables){
-            boolean varExistsInBody = false;
-            CheckAllAtoms:
-            for (RelationalAtom atom : tempBody){
+        // For every atom in the big body
+        for (RelationalAtom atom : queryBody) {
+            termCounter = -1;
+            // If the relationName is the same as the relationName of the atom to remove, there is a potential mapping here.
+            if (atom.getName().equals(atomToRemove.getName())){
+                // For every term of this atom.
                 for (Term term : atom.getTerms()){
-                    if (term instanceof Variable && ((Variable) term).equals(headVariable)){
-                        varExistsInBody = true;
-                        break CheckAllAtoms;
+                    // Keep positional counter.
+                    termCounter += 1;
+                    // Get term of atomToRemove in the same position.
+                    Term atomToRemoveTerm = atomToRemove.getTerms().get(termCounter);
+                    // If this term in the atomToRemove is a constant, map to itself.
+                    if (!(atomToRemoveTerm instanceof Variable)){
+                        mapping.put(atomToRemoveTerm, atomToRemoveTerm);
+                    }
+                    // If it is a variable, check that it's not a head variable and map.
+                    else {
+                        if (!(queryHead.containsVariable((Variable) atomToRemoveTerm))) {
+                            mapping.put(atomToRemoveTerm, term);
+                        }
                     }
                 }
-            }
-            if (!varExistsInBody){
-                return false;
+                // Once we have mapped every term according to this atom, Check for containment.
+                if (isContained(queryBody, atomToRemove, mapping)){
+                    return true;
+                }
+                // If it is not contained, this jumps to top for loop where we look at other atoms for a potential mapping.
+                // We first need to remove all the non-head mappings made.
+                List<Term> termsToRemoveFromMapping = new ArrayList<>();
+                for (Term term : mapping.keySet()){
+                    if (term instanceof Variable && (!(queryHead.containsVariable((Variable) term)))){
+                        termsToRemoveFromMapping.add(term);
+                    }
+                }
+                for (Term term : termsToRemoveFromMapping) {
+                    mapping.remove(term);
+                }
+                termsToRemoveFromMapping.clear();
             }
         }
+        return false;
+    }
 
-        // Check if all atoms in longer body appear in shorter body.
-        boolean allAtomsFound = true;
-        for (RelationalAtom atom : body){
-            if (!tempBody.contains(atom)){
-                allAtomsFound = false;
+    private static boolean isContained(List<RelationalAtom> queryBody, RelationalAtom atomToRemove, HashMap<Term, Term> mapping) {
+
+        List<RelationalAtom> queryBodyRemoved = new ArrayList<>(queryBody);
+        for (RelationalAtom atom : queryBodyRemoved) {
+            if (atom.equals(atomToRemove)){
+                atomToRemove = atom;
                 break;
             }
         }
-        if (allAtomsFound){
-            return true;
+        queryBodyRemoved.remove(atomToRemove);
+        List<RelationalAtom> mappedQueryBody = new ArrayList<>();
+
+        for (RelationalAtom atom : queryBody) {
+            mappedQueryBody.add(atom.mapTerms(mapping));
         }
 
-        // Check if constants in removed atom gives problems.
-        int position = 0;
-        boolean constantRemoved = true;
-        for (Term term : removedAtomTerms){
-            if (!(term instanceof Variable)){
-                for (RelationalAtom rAtom : tempBody){
-                    if (rAtom.getName().equals(removedAtom.getName()) && rAtom.getTerms().get(position).equals(term)) {
-                        constantRemoved = false;
-                        break;
-                    }
+        boolean atomFound = false;
+
+        for (RelationalAtom q1atom : mappedQueryBody) {
+            for (RelationalAtom q2atom : queryBodyRemoved) {
+                if (q2atom.equals(q1atom)){
+                    atomFound = true;
+                    break;
                 }
-                if (constantRemoved) {
-                    return false;
-                } else {
-                    constantRemoved = true;
-                }
+            }
+            if (!atomFound){
+                return false;
             }
             else {
-                position += 1;
+                atomFound = false;
             }
         }
 
-        // Find all possible mappings.
-        HashMap<Term, List<Term>> possibleMapping = new HashMap<>();
-        List<Term> possibleTerms = new ArrayList<>();
-        position = 0;
-        boolean isHeadVariable = false;
-        for (Term term : removedAtomTerms){
-            possibleTerms.clear();
-            if (term instanceof Variable){
-                for (Variable headVariable : headVariables){
-                    if (headVariable.equals((Variable) term)){
-                        isHeadVariable = true;
-                        possibleMapping.put(term, Collections.singletonList(term));
-                        break;
-                    }
-                }
-
-                if (!isHeadVariable) { // Not an output variable, but it is a term, so we need to map.
-                    for (RelationalAtom atom : tempBody){
-                        if (atom.getName().equals(removedAtom.getName())){
-                            possibleTerms.add(atom.getTerms().get(position));
-                        }
-                    }
-                    possibleMapping.put(term, possibleTerms);
-                }
-            }
-            else {
-                possibleTerms.add(term);
-                possibleMapping.put(term, possibleTerms);
-            }
-            position += 1;
-            isHeadVariable = false;
-        }
-
-        // Find a query homomorphism.
-        HashMap<Term, Term> mapping = new HashMap<>();
-        int numOfTermsInRemovedAtom = removedAtomTerms.size();
-        List<Term> potentialMap = new ArrayList<>();
-
-        for (int i = 0; i < possibleMapping.get(removedAtomTerms.get(0)).size(); i++){
-            for (Term removedAtomTerm : removedAtomTerms) {
-                mapping.put(removedAtomTerm, possibleMapping.get(removedAtomTerm).get(i));
-            }
-            // Apply mapping to big body and check if all of big body is in small body
-            for (RelationalAtom atom : body){
-                atom.mapVariables(mapping);
-            }
-
-            allAtomsFound = true;
-            for (RelationalAtom atom : body){
-                for (RelationalAtom atom2 : tempBody){
-                    if (atom2.equals(atom)){
-                        break;
-                    }
-                    allAtomsFound = false;
-                }
-            }
-            if (allAtomsFound){
-                return true;
-            }
-            else {
-                mapping.clear();
-            }
-
-        }
-
-        return false;
+        return true;
     }
 
     /**
@@ -222,9 +162,10 @@ public class CQMinimizer {
     public static Query parseQuery(String filename) {
 
         try {
-            return QueryParser.parse(Paths.get(filename));
-            // Query query = QueryParser.parse("Q(x, y) :- R(x, z), S(y, z, w)");
-            // Query query = QueryParser.parse("Q(x) :- R(x, 'z'), S(4, z, w)");
+            //return QueryParser.parse(Paths.get(filename));
+            //return QueryParser.parse("Q(x, y) :- R(x, z), S(y, z, w)");
+            //return QueryParser.parse("Q(x) :- R(x, 'z'), S(4, z, w)");
+            return QueryParser.parse("Q(x) :- P(x,a), P(a,a), T(b,b,x), T(z,z,a)");
         }
         catch (Exception e)
         {

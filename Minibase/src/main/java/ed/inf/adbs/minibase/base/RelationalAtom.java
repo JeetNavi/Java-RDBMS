@@ -3,7 +3,6 @@ package ed.inf.adbs.minibase.base;
 import ed.inf.adbs.minibase.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,18 +24,40 @@ public class RelationalAtom extends Atom {
         return terms;
     }
 
-    public void mapVariables(HashMap<Term, Term> mapping){
-        List<Term> newTerms = new ArrayList<>();
-
-        for (Term term : this.terms){
-            newTerms.add(mapping.getOrDefault(term, term));
-        }
-
-        this.terms = newTerms;
+    public boolean equals(RelationalAtom atom){
+        return this.toString().equals(atom.toString());
     }
 
-    public boolean equals (RelationalAtom atom){
-        return atom.toString().equals(this.toString());
+    public RelationalAtom mapTerms (HashMap<Term, Term> mapping) {
+
+        List<Term> mappedTerms = new ArrayList<>();
+        boolean found = false;
+
+        for (Term term : terms) {
+            if (!(term instanceof Variable)){
+                mappedTerms.add(term);
+            }
+            else {
+                for (Term key : mapping.keySet()){
+                    if (key instanceof Variable) {
+                        if (((Variable) key).equals((Variable) term)){
+                            mappedTerms.add(mapping.get(key));
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found){
+                    mappedTerms.add(term);
+                }
+                else {
+                    found = false;
+                }
+            }
+
+        }
+
+        return new RelationalAtom(this.name, mappedTerms);
     }
 
     @Override
