@@ -26,10 +26,6 @@ public class Query {
         this.body.remove(atom);
     }
 
-//    public Query clone() {
-//        return new Query(this.head, this.body);
-//    }
-
     @Override
     public String toString() {
         return head + " :- " + Utils.join(body, ", ");
