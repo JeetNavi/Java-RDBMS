@@ -42,6 +42,8 @@ public class CQMinimizer {
         // Minimize the CQ.
         Query minimizedCQ = minimizeCQ(CQ);
 
+
+
         // Write the minimized CQ to the output file.
         try {
             FileWriter myWriter = new FileWriter(outputFile);
@@ -100,7 +102,7 @@ public class CQMinimizer {
      * @param atomToRemove The atom to remove from the body.
      * @return true if there is a query homomorphism else false.
      */
-    private static boolean isQueryHomo(Head queryHead, List<RelationalAtom> queryBody, RelationalAtom atomToRemove) {
+    public static boolean isQueryHomo(Head queryHead, List<RelationalAtom> queryBody, RelationalAtom atomToRemove) {
 
         HashMap<Term, Term> mapping = new HashMap<>();
 
@@ -209,15 +211,22 @@ public class CQMinimizer {
     }
 
     /**
-     * Example method for getting started with the parser.
-     * Reads CQ from a file and prints it to screen, then extracts Head and Body
-     * from the query and prints them to screen.
+     * Method to parse a CQ from a provided file (provided as filename).
+     * Reads CQ from a file and prints different parts of the query to the screen.
+     * @param filename The name of the file of which the CQ is in.
+     * @return Parsed CQ as a Query object.
      */
-
     public static Query parseQuery(String filename) {
 
         try {
-            return QueryParser.parse(Paths.get(filename));
+            Query query = QueryParser.parse(Paths.get(filename));
+            System.out.println("Entire query: " + query);
+            Head head = query.getHead();
+            System.out.println("Head: " + head);
+            List<Atom> body = query.getBody();
+            System.out.println("Body: " + body);
+
+            return query;
         }
         catch (Exception e)
         {
