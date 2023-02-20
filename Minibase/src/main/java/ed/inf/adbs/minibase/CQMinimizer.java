@@ -123,7 +123,7 @@ public class CQMinimizer {
             // We will refer to the current atom of this for loop as "the atom".
             termCounter = -1;
             // If the relationName is the same as the relationName of the atomToRemove, there is a potential mapping here.
-            if (atom.getName().equals(atomToRemove.getName())){
+            if (atom.getName().equals(atomToRemove.getName())) {
                 for (Term term : atom.getTerms()){
                     termCounter += 1;
                     // Get term of atomToRemove in the same position.
@@ -176,12 +176,6 @@ public class CQMinimizer {
         // Creating the smaller body (by removing the atom from the bigger body).
         // Our goal in this method is to check if the mapping given is a query homomorphism from the smaller body to the bigger body.
         List<RelationalAtom> queryBodyRemoved = new ArrayList<>(queryBody);
-        for (RelationalAtom atom : queryBodyRemoved) {
-            if (atom.equals(atomToRemove)){
-                atomToRemove = atom;
-                break;
-            }
-        }
         queryBodyRemoved.remove(atomToRemove);
 
         // Creates the resulting body from mapping all the atoms in the bigger body according to the given mapping.

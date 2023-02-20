@@ -22,12 +22,17 @@ public class Query {
         return body;
     }
 
-    public void removeFromBody(Atom atom) {
-        this.body.remove(atom);
-    }
-
     @Override
     public String toString() {
         return head + " :- " + Utils.join(body, ", ");
+    }
+
+
+    /**
+     * Method that removes a given atom from the body of the query.
+     * @param atom Atom to remove from the body.
+     */
+    public void removeFromBody(RelationalAtom atom) {
+        body.remove(atom);
     }
 }
