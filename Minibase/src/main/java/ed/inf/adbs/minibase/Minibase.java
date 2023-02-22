@@ -1,8 +1,6 @@
 package ed.inf.adbs.minibase;
 
-import ed.inf.adbs.minibase.base.Atom;
-import ed.inf.adbs.minibase.base.Query;
-import ed.inf.adbs.minibase.base.Head;
+import ed.inf.adbs.minibase.base.*;
 import ed.inf.adbs.minibase.parser.QueryParser;
 
 import java.nio.file.Paths;
@@ -25,13 +23,21 @@ public class Minibase {
         String inputFile = args[1];
         String outputFile = args[2];
 
-//        evaluateCQ(databaseDir, inputFile, outputFile);
 
-        parsingExample(inputFile);
+        evaluateCQ(databaseDir, inputFile, outputFile);
     }
 
     public static void evaluateCQ(String databaseDir, String inputFile, String outputFile) {
-        // TODO: add your implementation
+        DatabaseCatalog.init(databaseDir);
+        Query query = parseQuery(inputFile);
+        assert query != null;
+
+        // ASSUMING BODY IS OF LENGTH 1, AND IS A SCAN.
+        List<Atom> body = query.getBody();
+        RelationalAtom atom = (RelationalAtom) body.get(0);
+
+        ScanOperator so = new ScanOperator(atom.getName());
+        so.dump();
     }
 
     /**
@@ -40,7 +46,7 @@ public class Minibase {
      * from the query and prints them to screen.
      */
 
-    public static void parsingExample(String filename) {
+    public static Query parseQuery(String filename) {
         try {
             Query query = QueryParser.parse(Paths.get(filename));
             // Query query = QueryParser.parse("Q(x, y) :- R(x, z), S(y, z, w), z < w");
@@ -51,11 +57,13 @@ public class Minibase {
             System.out.println("Head: " + head);
             List<Atom> body = query.getBody();
             System.out.println("Body: " + body);
+            return query;
         }
         catch (Exception e)
         {
             System.err.println("Exception occurred during parsing");
             e.printStackTrace();
+            return null;
         }
     }
 
