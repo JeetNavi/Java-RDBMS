@@ -6,11 +6,11 @@ import java.util.List;
 public class SelectionCondition {
 
     private List<ComparisonAtom> conditions;
-    private HashMap<Variable, Integer> varPositions;
 
-    public SelectionCondition(List<ComparisonAtom> conditions, HashMap<Variable, Integer> varPositions) {
+    private DatabaseCatalog catalog = DatabaseCatalog.getCatalogInstance();
+
+    public SelectionCondition(List<ComparisonAtom> conditions) {
         this.conditions = conditions;
-        this.varPositions = varPositions;
     }
 
     public boolean evaluateOnTuple(Tuple tuple) {
@@ -78,8 +78,8 @@ public class SelectionCondition {
 
         // For comparisons of variables, i.e. x < y.
         else if (lhs instanceof Variable && rhs instanceof Variable) {
-            int lhsPos = varPositions.get((Variable) lhs);
-            int rhsPos = varPositions.get((Variable) rhs);
+            int lhsPos = catalog.getVarPos((Variable) lhs);
+            int rhsPos = catalog.getVarPos((Variable) rhs);
 
             Constant[] tupleValues = tuple.getValues();
 
@@ -97,7 +97,7 @@ public class SelectionCondition {
         else {
             // LHS is the variable, i.e. x < 2.
             if (lhs instanceof Variable) {
-                int varPos = varPositions.get((Variable) lhs);
+                int varPos = catalog.getVarPos((Variable) lhs);
 
                 Constant[] tupleValues = tuple.getValues();
 
@@ -138,8 +138,8 @@ public class SelectionCondition {
 
         // For comparisons of variables, i.e. x > y.
         else if (lhs instanceof Variable && rhs instanceof Variable) {
-            int lhsPos = varPositions.get((Variable) lhs);
-            int rhsPos = varPositions.get((Variable) rhs);
+            int lhsPos = catalog.getVarPos((Variable) lhs);
+            int rhsPos = catalog.getVarPos((Variable) rhs);
 
             Constant[] tupleValues = tuple.getValues();
 
@@ -157,7 +157,7 @@ public class SelectionCondition {
         else {
             // LHS is the variable, i.e. x > 2.
             if (lhs instanceof Variable) {
-                int varPos = varPositions.get((Variable) lhs);
+                int varPos = catalog.getVarPos((Variable) lhs);
 
                 Constant[] tupleValues = tuple.getValues();
 
@@ -198,8 +198,8 @@ public class SelectionCondition {
 
         // For comparisons of variables, i.e. x = y.
         else if (lhs instanceof Variable && rhs instanceof Variable) {
-            int lhsPos = varPositions.get((Variable) lhs);
-            int rhsPos = varPositions.get((Variable) rhs);
+            int lhsPos = catalog.getVarPos((Variable) lhs);
+            int rhsPos = catalog.getVarPos((Variable) rhs);
 
             Constant[] tupleValues = tuple.getValues();
 
@@ -220,7 +220,7 @@ public class SelectionCondition {
 
             if (lhs instanceof Variable) {
                 // LHS is the variable, i.e. x = 2 or x = "abc".
-                int varPos = varPositions.get((Variable) lhs);
+                int varPos = catalog.getVarPos((Variable) lhs);
                 if (rhs instanceof IntegerConstant) {
                     // RHS is an integerConstant, i.e. x = 2.
                     return (((IntegerConstant) tupleValues[varPos]).getValue()).equals(((IntegerConstant) rhs).getValue());
@@ -232,7 +232,7 @@ public class SelectionCondition {
 
             else {
                 //RHS is the variable, i.e. 2 = x or "abc" = x.
-                int varPos = varPositions.get((Variable) rhs);
+                int varPos = catalog.getVarPos((Variable) rhs);
                 if (lhs instanceof IntegerConstant) {
                     // LHS is an integerConstant, i.e. 2 = x.
                     return (((IntegerConstant) lhs).getValue()).equals(((IntegerConstant) (tupleValues[varPos])).getValue());

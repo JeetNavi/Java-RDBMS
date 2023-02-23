@@ -5,7 +5,9 @@ import ed.inf.adbs.minibase.parser.QueryParser;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 /**
  * In-memory database system
@@ -33,13 +35,6 @@ public class Minibase {
         Query query = parseQuery(inputFile);
         assert query != null;
 
-//        // ASSUMING BODY IS OF LENGTH 1, AND IS A SCAN.
-//        List<Atom> body = query.getBody();
-//        RelationalAtom atom = (RelationalAtom) body.get(0);
-//
-//        ScanOperator so = new ScanOperator(atom);
-//        so.dump();
-
         List<Atom> body = query.getBody();
         Operator operation = identifyOperation(body);
         operation.dump();
@@ -54,7 +49,39 @@ public class Minibase {
         
         List<ComparisonAtom> conditions = new ArrayList<>();
 
+        List<Atom> rewrittenBody = new ArrayList<>();
+
+        DatabaseCatalog catalog = DatabaseCatalog.getCatalogInstance();
+
+        // First we add all variable positions to the varPositions mapping.
         for (Atom atom : body) {
+            if (atom instanceof RelationalAtom) {
+                for (int i = 0; i < ((RelationalAtom) atom).getTerms().size(); i++) {
+                    Term term = ((RelationalAtom) atom).getTerms().get(i);
+                    if (term instanceof Variable) {
+                        catalog.setVarPos((Variable) term, i);
+                    }
+                }
+            }
+        }
+
+        // Then we rewrite any relational atoms of the form R(x, 2) to R(x, z), z = 2 (remembering to add any new variable to pos mapping).
+        for (Atom atom : body) {
+            if (atom instanceof RelationalAtom) {
+                if ((((RelationalAtom) atom).getTerms()).stream().anyMatch(Constant.class::isInstance)) {
+                    List<Atom> extendedAtom = rewriteAtom((RelationalAtom) atom);
+                    rewrittenBody.addAll(extendedAtom);
+                }
+                else {
+                    rewrittenBody.add(atom);
+                }
+            }
+            else {
+                rewrittenBody.add(atom);
+            }
+        }
+
+        for (Atom atom : rewrittenBody) {
             if (atom instanceof RelationalAtom){
                 // Scan
                 RelationalAtom relationalAtom = (RelationalAtom) atom;
@@ -75,6 +102,62 @@ public class Minibase {
         }
 
         return operation;
+    }
+
+    private static List<Atom> rewriteAtom(RelationalAtom atom) {
+
+        HashMap<Integer, Constant> posOfConstants = new HashMap<>();
+
+        int posCounter = 0;
+
+        for (Term term : atom.getTerms()) {
+            if (term instanceof Constant){
+                posOfConstants.put(posCounter, (Constant) term);
+            }
+            posCounter += 1;
+        }
+
+
+        Random rnd = new Random();
+
+        HashMap<Integer, Variable> posOfNewVars = new HashMap<>();
+
+        for (Integer pos : posOfConstants.keySet()) {
+            Variable rndVar = new Variable(String.valueOf((char) ('a' + rnd.nextInt(26))));
+
+            while (DatabaseCatalog.getCatalogInstance().getVarPositions().containsKey((rndVar))){
+                rndVar.changeName(rndVar.getName() + (String.valueOf((char) ('a' + rnd.nextInt(26)))));
+            }
+            // We have generated a new variable in rndVar
+            DatabaseCatalog.getCatalogInstance().setVarPos(rndVar, pos);
+            posOfNewVars.put(pos, rndVar);
+        }
+
+        // Construct the new atoms.
+        posCounter = 0;
+
+        List<ComparisonAtom> conditions = new ArrayList<>();
+
+        List<Term> newVars = new ArrayList<>();
+
+        for (Term term : atom.getTerms()) {
+            if (term instanceof Constant) {
+                newVars.add(posOfNewVars.get(posCounter));
+                conditions.add(new ComparisonAtom(posOfNewVars.get(posCounter), posOfConstants.get(posCounter), ComparisonOperator.EQ));
+            }
+            else {
+                newVars.add(term);
+            }
+            posCounter += 1;
+        }
+
+        Atom scanAtom = new RelationalAtom(atom.getName(), newVars);
+
+        List<Atom> result = new ArrayList<>();
+        result.add(scanAtom);
+        result.addAll(conditions);
+
+        return result;
     }
 
     /**

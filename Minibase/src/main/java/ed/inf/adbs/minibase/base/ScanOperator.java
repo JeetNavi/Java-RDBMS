@@ -12,10 +12,10 @@ public class ScanOperator extends Operator{
     public ScanOperator(RelationalAtom relationalAtom) {
         this.baseRelation = relationalAtom.getName();
         createScanner();
-        // Add variable positions to map.
-        for (int i = 0; i < relationalAtom.getTerms().size(); i++) {
-            varPositions.put((Variable) relationalAtom.getTerms().get(i), i);
-        }
+//        // Add variable positions to map.
+//        for (int i = 0; i < relationalAtom.getTerms().size(); i++) {
+//            DatabaseCatalog.getCatalogInstance().setVarPos((Variable) relationalAtom.getTerms().get(i), i);
+//        }
     }
 
     /**

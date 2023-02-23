@@ -39,4 +39,8 @@ public class Variable extends Term {
     public String toString() {
         return name;
     }
+
+    public void changeName(String newName) {
+        name = newName;
+    }
 }

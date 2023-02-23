@@ -19,7 +19,7 @@ public class SelectOperator extends Operator{
     @Override
     public Tuple getNextTuple() {
 
-        SelectionCondition selectionCondition = new SelectionCondition(conditions, varPositions);
+        SelectionCondition selectionCondition = new SelectionCondition(conditions);
         Tuple childTuple;
 
         do {

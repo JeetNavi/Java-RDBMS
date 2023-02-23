@@ -66,4 +66,8 @@ public class RelationalAtom extends Atom {
 
         return new RelationalAtom(name, mappedTerms);
     }
+
+    public void changeTermAtIndex(Integer index, Term term) {
+        terms.set(index, term);
+    }
 }

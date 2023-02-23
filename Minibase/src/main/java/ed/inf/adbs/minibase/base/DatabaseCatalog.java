@@ -15,10 +15,14 @@ public class DatabaseCatalog {
     private final HashMap<String, String> relationLocations;
     private final HashMap<String, String[]> relationSchemas;
 
+    private static HashMap<Variable, Integer> varPositions;
+
     private DatabaseCatalog(String db) {
 
         HashMap<String, String> relationLocations = new HashMap<>();
         HashMap<String, String[]> relationSchemas = new HashMap<>();
+
+        varPositions = new HashMap<>();
 
         try {
             List<String> allSchemas = Files.readAllLines(Paths.get(db + File.separator + "schema.txt"));
@@ -77,4 +81,14 @@ public class DatabaseCatalog {
     public String[] getSchema(String relation) {
         return relationSchemas.get(relation);
     }
+
+    public Integer getVarPos(Variable variable) {
+        return varPositions.get(variable);
+    }
+
+    public void setVarPos(Variable variable, Integer position) {
+        varPositions.put(variable, position);
+    }
+
+    public HashMap<Variable, Integer> getVarPositions() {return varPositions;}
 }

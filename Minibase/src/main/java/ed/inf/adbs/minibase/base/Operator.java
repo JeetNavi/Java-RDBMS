@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public abstract class Operator {
 
-    public static HashMap<Variable, Integer> varPositions = new HashMap<>();
+    //public static HashMap<Variable, Integer> varPositions = new HashMap<>();
 
     public abstract Tuple getNextTuple();
 
