@@ -9,9 +9,13 @@ public class ScanOperator extends Operator{
     private String baseRelation;
     private Scanner scanner;
 
-    public ScanOperator(String baseRelation) {
-        this.baseRelation = baseRelation;
+    public ScanOperator(RelationalAtom relationalAtom) {
+        this.baseRelation = relationalAtom.getName();
         createScanner();
+        // Add variable positions to map.
+        for (int i = 0; i < relationalAtom.getTerms().size(); i++) {
+            varPositions.put((Variable) relationalAtom.getTerms().get(i), i);
+        }
     }
 
     /**

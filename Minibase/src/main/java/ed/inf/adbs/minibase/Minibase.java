@@ -4,6 +4,7 @@ import ed.inf.adbs.minibase.base.*;
 import ed.inf.adbs.minibase.parser.QueryParser;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,12 +33,48 @@ public class Minibase {
         Query query = parseQuery(inputFile);
         assert query != null;
 
-        // ASSUMING BODY IS OF LENGTH 1, AND IS A SCAN.
-        List<Atom> body = query.getBody();
-        RelationalAtom atom = (RelationalAtom) body.get(0);
+//        // ASSUMING BODY IS OF LENGTH 1, AND IS A SCAN.
+//        List<Atom> body = query.getBody();
+//        RelationalAtom atom = (RelationalAtom) body.get(0);
+//
+//        ScanOperator so = new ScanOperator(atom);
+//        so.dump();
 
-        ScanOperator so = new ScanOperator(atom.getName());
-        so.dump();
+        List<Atom> body = query.getBody();
+        Operator operation = identifyOperation(body);
+        operation.dump();
+
+    }
+
+    public static Operator identifyOperation(List<Atom> body) {
+        
+        Operator operation;
+        
+        ScanOperator scanOperator = null;
+        
+        List<ComparisonAtom> conditions = new ArrayList<>();
+
+        for (Atom atom : body) {
+            if (atom instanceof RelationalAtom){
+                // Scan
+                RelationalAtom relationalAtom = (RelationalAtom) atom;
+                scanOperator = new ScanOperator(relationalAtom);
+            }
+            else {
+                // Selection
+                ComparisonAtom comparisonAtom = (ComparisonAtom) atom;
+                conditions.add(comparisonAtom);
+            }
+        }
+        
+        if (conditions.size() > 0) {
+            operation = new SelectOperator(conditions, scanOperator);
+        }
+        else {
+            operation = scanOperator;
+        }
+
+        return operation;
     }
 
     /**

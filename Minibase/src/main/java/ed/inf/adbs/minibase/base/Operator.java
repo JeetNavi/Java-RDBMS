@@ -2,7 +2,9 @@ package ed.inf.adbs.minibase.base;
 
 import java.util.HashMap;
 
-abstract class Operator {
+public abstract class Operator {
+
+    public static HashMap<Variable, Integer> varPositions = new HashMap<>();
 
     public abstract Tuple getNextTuple();
 

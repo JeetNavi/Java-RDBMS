@@ -1,7 +1,5 @@
 package ed.inf.adbs.minibase.base;
 
-import jdk.javadoc.internal.doclets.toolkit.taglets.ValueTaglet;
-
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,6 +14,10 @@ public class SelectionCondition {
     }
 
     public boolean evaluateOnTuple(Tuple tuple) {
+
+        if (tuple == null) {
+            return false;
+        }
 
         boolean conditionHolds = false;
 
@@ -33,15 +35,13 @@ public class SelectionCondition {
                     break;
                 case GEQ:
                     conditionHolds = evaluateConditionEQ(tuple, comparisonAtom);
-                    if (conditionHolds) {
-                        conditionHolds = evaluateConditionGT(tuple, comparisonAtom);
-                    }
+                    if (conditionHolds) { break; }
+                    conditionHolds = evaluateConditionGT(tuple, comparisonAtom);
                     break;
                 case LEQ:
                     conditionHolds = evaluateConditionEQ(tuple, comparisonAtom);
-                    if (conditionHolds) {
-                        conditionHolds = evaluateConditionLT(tuple, comparisonAtom);
-                    }
+                    if (conditionHolds) { break; }
+                    conditionHolds = evaluateConditionLT(tuple, comparisonAtom);
                     break;
                 case NEQ:
                     conditionHolds = !evaluateConditionEQ(tuple, comparisonAtom);
