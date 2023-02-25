@@ -35,13 +35,14 @@ public class Minibase {
         Query query = parseQuery(inputFile);
         assert query != null;
 
-        List<Atom> body = query.getBody();
-        Operator operation = identifyOperation(body);
+        Operator operation = identifyOperation(query);
         operation.dump();
 
     }
 
-    public static Operator identifyOperation(List<Atom> body) {
+    public static Operator identifyOperation(Query query) {
+
+        List<Atom> body = query.getBody();
         
         Operator operation;
         
@@ -99,6 +100,23 @@ public class Minibase {
         }
         else {
             operation = scanOperator;
+        }
+
+        // Look at head to see if we need projection.
+
+        boolean change = false;
+
+        Head head = query.getHead();
+
+        // Assuming all queries has relational atom at the beginning.
+        RelationalAtom atom = (RelationalAtom) body.get(0);
+        String relationName = atom.getName();
+        List<Term> terms = atom.getTerms();
+
+        // First check if there are any projected away.
+
+        if (!head.getVariables().equals(terms)) {
+            operation = new ProjectOperator(operation, head);
         }
 
         return operation;
