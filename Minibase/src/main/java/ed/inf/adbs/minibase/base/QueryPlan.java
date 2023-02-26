@@ -60,15 +60,21 @@ public class QueryPlan {
     }
 
     private void storeVariablePositions() {
+
+        //Maybe moving this to databasecatalog?
+
         DatabaseCatalog catalog = DatabaseCatalog.getCatalogInstance();
+
+        int globalPosCounter = 0;
 
         for (Atom atom : query.getBody()) {
             if (atom instanceof RelationalAtom) {
                 for (int i = 0; i < ((RelationalAtom) atom).getTerms().size(); i++) {
                     Term term = ((RelationalAtom) atom).getTerms().get(i);
                     if (term instanceof Variable) {
-                        catalog.setVarPos((Variable) term, i);
+                        catalog.setVarPos((Variable) term, globalPosCounter);
                     }
+                    globalPosCounter += 1;
                 }
             }
         }

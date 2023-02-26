@@ -1,2 +1,3 @@
-8, 9, 'rl'
-8, 9, 'ppls'
+Tuple{values=[7, 9, 'cl']}
+Tuple{values=[8, 9, 'rl']}
+Tuple{values=[8, 9, 'ppls']}
