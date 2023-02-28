@@ -4,11 +4,11 @@ import java.util.List;
 
 public class SelectOperator extends Operator{
 
-    private List<ComparisonAtom> conditions;
+    private SelectionCondition conditions;
 
     private Operator childOperator;
 
-    public SelectOperator(List<ComparisonAtom> conditions, Operator childOperator) {
+    public SelectOperator(SelectionCondition conditions, Operator childOperator) {
         this.conditions = conditions;
         this.childOperator = childOperator;
     }
@@ -19,13 +19,12 @@ public class SelectOperator extends Operator{
     @Override
     public Tuple getNextTuple() {
 
-        SelectionCondition selectionCondition = new SelectionCondition(conditions);
         Tuple childTuple;
 
         do {
             childTuple = childOperator.getNextTuple();
 
-            if (selectionCondition.evaluateOnTuple(childTuple)) {
+            if (conditions.evaluateOnTuple(childTuple)) {
                 return childTuple;
             }
 

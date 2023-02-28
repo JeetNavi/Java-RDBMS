@@ -16,6 +16,8 @@ public class DatabaseCatalog {
     private final HashMap<String, String[]> relationSchemas;
 
     private static HashMap<Variable, Integer> varPositions;
+    private static HashMap<String, HashMap<Variable, Integer>> localVarPositions;
+    private static HashMap<Variable, String> varRelations;
 
     private DatabaseCatalog(String db) {
 
@@ -23,6 +25,8 @@ public class DatabaseCatalog {
         HashMap<String, String[]> relationSchemas = new HashMap<>();
 
         varPositions = new HashMap<>();
+        localVarPositions = new HashMap<>();
+        varRelations = new HashMap<>();
 
         try {
             List<String> allSchemas = Files.readAllLines(Paths.get(db + File.separator + "schema.txt"));
@@ -87,8 +91,44 @@ public class DatabaseCatalog {
     }
 
     public void setVarPos(Variable variable, Integer position) {
-        varPositions.put(variable, position);
+
+        if (!(varPositions.containsKey(variable))) {
+            varPositions.put(variable, position);
+        }
     }
 
     public HashMap<Variable, Integer> getVarPositions() {return varPositions;}
+
+    public void setVarRelation(Variable variable, String relation) {
+
+        varRelations.put(variable, relation);
+    }
+
+    public String getVarRelation(Variable variable) {
+        return varRelations.get(variable);
+    }
+
+    public HashMap<Variable, String> getVarRelations() {
+        return varRelations;
+    }
+
+    public void setVarRelationIfNotExists(Variable variable, String relation) {
+        varRelations.putIfAbsent(variable, relation);
+    }
+
+    public Integer getLocalVarPos(String relation, Variable variable) {
+        return localVarPositions.get(relation).get(variable);
+    }
+
+    public void setLocalVarPos(String relation, Variable variable, Integer position) {
+
+        if (!localVarPositions.containsKey(relation)) {
+            HashMap<Variable, Integer> newMap = new HashMap<>();
+            newMap.put(variable, position);
+            localVarPositions.put(relation, newMap);
+        }
+        else {
+            localVarPositions.get(relation).put(variable, position);
+        }
+    }
 }

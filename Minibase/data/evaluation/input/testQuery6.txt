@@ -1,1 +1,1 @@
-Q(x, x, x) :- U(x, y, z), x != 7, y = 9, z != 'adbs'
+Q(x, x, x) :- U(1, 1, z), R(a, 4, c), S(x, 'smith', a)

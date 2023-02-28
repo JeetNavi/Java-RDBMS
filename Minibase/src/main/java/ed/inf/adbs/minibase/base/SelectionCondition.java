@@ -220,7 +220,7 @@ public class SelectionCondition {
 
             if (lhs instanceof Variable) {
                 // LHS is the variable, i.e. x = 2 or x = "abc".
-                int varPos = catalog.getVarPos((Variable) lhs);
+                int varPos = catalog.getLocalVarPos(catalog.getVarRelation((Variable) lhs), (Variable) lhs);
                 if (rhs instanceof IntegerConstant) {
                     // RHS is an integerConstant, i.e. x = 2.
                     return (((IntegerConstant) tupleValues[varPos]).getValue()).equals(((IntegerConstant) rhs).getValue());
@@ -232,7 +232,7 @@ public class SelectionCondition {
 
             else {
                 //RHS is the variable, i.e. 2 = x or "abc" = x.
-                int varPos = catalog.getVarPos((Variable) rhs);
+                int varPos = catalog.getLocalVarPos(catalog.getVarRelation((Variable) rhs), (Variable) rhs);
                 if (lhs instanceof IntegerConstant) {
                     // LHS is an integerConstant, i.e. 2 = x.
                     return (((IntegerConstant) lhs).getValue()).equals(((IntegerConstant) (tupleValues[varPos])).getValue());
@@ -245,6 +245,12 @@ public class SelectionCondition {
 
 
         }
+
+        public void addCondition(ComparisonAtom condition) {
+            conditions.add(condition);
+        }
+
+
 
     }
 

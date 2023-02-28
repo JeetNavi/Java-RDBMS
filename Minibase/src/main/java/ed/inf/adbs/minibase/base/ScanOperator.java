@@ -52,4 +52,8 @@ public class ScanOperator extends Operator{
         }
 
     }
+
+    public String getBaseRelation() {
+        return baseRelation;
+    }
 }

@@ -37,8 +37,12 @@ public class Minibase {
 
         QueryPlan queryPlan = new QueryPlan(query);
 
+        // Plan could be null if there is a comparison atom that will never hold, i.e. 1=2.
         Operator plan = queryPlan.getPlan();
-        plan.dump();
+
+        if (plan != null){
+            plan.dump();
+        }
 
     }
 
