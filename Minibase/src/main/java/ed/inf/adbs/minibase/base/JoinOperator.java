@@ -15,6 +15,7 @@ public class JoinOperator extends Operator {
     private Tuple rightChildTuple;
     private final int leftTupleLen;
     private final int rightTupleLen;
+    private final List<Variable> joinedTupleVars;
 
     public JoinOperator(Operator leftChildOperator, Operator rightChildOperator, SelectionCondition joinCondition) {
         this.leftChildOperator = leftChildOperator;
@@ -22,6 +23,8 @@ public class JoinOperator extends Operator {
         this.joinCondition = joinCondition;
         leftChildTuple = leftChildOperator.getNextTuple();
         rightChildTuple = rightChildOperator.getNextTuple();
+        joinedTupleVars = leftChildTuple.getVariables();
+        joinedTupleVars.addAll(rightChildTuple.getVariables());
         leftTupleLen = leftChildTuple.getValues().length;
         rightTupleLen = rightChildTuple.getValues().length;
     }
@@ -40,7 +43,7 @@ public class JoinOperator extends Operator {
                 Constant[] joinedTupleValues = new Constant[leftTupleLen + rightTupleLen];
                 System.arraycopy(leftTupleValues, 0, joinedTupleValues, 0, leftTupleLen);
                 System.arraycopy(rightTupleValues, 0, joinedTupleValues, leftTupleLen, rightTupleLen);
-                Tuple joinedTuple = new Tuple(joinedTupleValues);
+                Tuple joinedTuple = new Tuple(joinedTupleValues, joinedTupleVars);
                 if (joinCondition == null) {
                     rightChildTuple = rightChildOperator.getNextTuple();
                     return joinedTuple;

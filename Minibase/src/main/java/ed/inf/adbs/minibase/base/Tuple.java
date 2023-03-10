@@ -7,12 +7,27 @@ import java.util.Objects;
 public class Tuple {
 
     private Constant[] values;
-    private Variable[] variables;
+    private List<Variable> variables;
 
-    public Tuple (Constant[] values) {this.values = values;}
+    public Tuple (Constant[] values, List<Variable> variables) {
+        this.values = values;
+        this.variables = variables;
+    }
 
     public Constant[] getValues() {
         return values;
+    }
+
+    public Integer getPosOfVar(Variable variable) {
+        return variables.indexOf(variable);
+    }
+
+    public List<Variable> getVariables() {
+        return variables;
+    }
+
+    public Constant getConstantFromVariable(Variable variable) {
+        return values[variables.indexOf(variable)];
     }
 
     @Override

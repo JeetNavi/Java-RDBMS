@@ -2,7 +2,10 @@ package ed.inf.adbs.minibase.base;
 
 import ed.inf.adbs.minibase.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 public class RelationalAtom extends Atom {
     private String name;
@@ -62,9 +65,5 @@ public class RelationalAtom extends Atom {
         }
 
         return new RelationalAtom(name, mappedTerms);
-    }
-
-    public void replaceVar(Variable oldVar, Variable newVar) {
-        Collections.replaceAll(terms, oldVar, newVar);
     }
 }

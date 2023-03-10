@@ -1,6 +1,7 @@
 package ed.inf.adbs.minibase.base;
 
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class Operator {
 
@@ -29,7 +30,7 @@ public abstract class Operator {
 
     }
 
-    public Tuple toTuple(String tupleString) {
+    public Tuple toTuple(String tupleString, List<Variable> variables) {
         String[] tupleSplit = tupleString.split(", |,");
         Constant[] tupleValues = new Constant[tupleSplit.length];
 
@@ -46,7 +47,7 @@ public abstract class Operator {
             counter += 1;
         }
 
-        return new Tuple(tupleValues);
+        return new Tuple(tupleValues, variables);
     }
 
     public void addPositionOfTerm(Term term, int pos) {

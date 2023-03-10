@@ -4,10 +4,7 @@ import ed.inf.adbs.minibase.base.*;
 import ed.inf.adbs.minibase.parser.QueryParser;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * In-memory database system
@@ -35,15 +32,23 @@ public class Minibase {
         Query query = parseQuery(inputFile);
         assert query != null;
 
-        QueryPlan queryPlan = new QueryPlan(query);
+        //QueryPlan queryPlan = new QueryPlan(query);
 
         // Plan could be null if there is a comparison atom that will never hold, i.e. 1=2.
-        Operator plan = queryPlan.getPlan();
+        //Operator plan = queryPlan.getPlan();
 
-        if (plan != null){
-            plan.dump();
-        }
+        //if (plan != null){
+        //    plan.dump();
+        //}
 
+        Operator scanU1 = new ScanOperator((RelationalAtom) query.getBody().get(0));
+        Operator scanU2 = new ScanOperator((RelationalAtom) query.getBody().get(1));
+
+        List<ComparisonAtom> conditions = Collections.singletonList((ComparisonAtom) query.getBody().get(2));
+        SelectionCondition joinCond = new SelectionCondition(conditions);
+        Operator join = new JoinOperator(scanU1, scanU2, joinCond);
+
+        join.dump();
     }
 
     /**

@@ -9,18 +9,12 @@ public class ProjectOperator extends Operator {
 
     private Operator childOperator;
 
-    private List<Integer> headVarsPos = new ArrayList<>();
+    private List<Variable> headVariables;
 
     public ProjectOperator(Operator childOperator, Head queryHead) {
 
-        DatabaseCatalog catalog = DatabaseCatalog.getCatalogInstance();
-
         this.childOperator = childOperator;
-        List<Variable> headVars = queryHead.getVariables();
-
-        for (Variable variable : headVars) {
-            headVarsPos.add(catalog.getVarPos(variable));
-        }
+        this.headVariables = queryHead.getVariables();
 
     }
 
@@ -36,18 +30,17 @@ public class ProjectOperator extends Operator {
             return null;
         }
 
-        Constant[] childTupleVals = childTuple.getValues();
         Tuple projectedTuple;
-        Constant[] projectedTupleVals = new Constant[headVarsPos.size()];
+        Constant[] projectedTupleVals = new Constant[headVariables.size()];
 
         int posCounter = 0;
 
-        for (Integer varPos : headVarsPos) {
-            projectedTupleVals[posCounter] = childTupleVals[varPos];
+        for (Variable variable : headVariables) {
+            projectedTupleVals[posCounter] = childTuple.getConstantFromVariable(variable);
             posCounter += 1;
         }
 
-        projectedTuple = new Tuple(projectedTupleVals);
+        projectedTuple = new Tuple(projectedTupleVals, headVariables);
 
         if (!(reportedTuples.contains(projectedTuple))) {
             reportedTuples.add(projectedTuple);
