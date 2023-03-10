@@ -220,7 +220,7 @@ public class SelectionCondition {
 
             if (lhs instanceof Variable) {
                 // LHS is the variable, i.e. x = 2 or x = "abc".
-                int varPos = catalog.getLocalVarPos(catalog.getVarRelation((Variable) lhs), (Variable) lhs);
+                int varPos = catalog.getLocalVarPos(catalog.getVarRelation((Variable) lhs), (Variable) lhs); // TODO Here was localvarpos. i changed back to varpos, nvm?
                 if (rhs instanceof IntegerConstant) {
                     // RHS is an integerConstant, i.e. x = 2.
                     return (((IntegerConstant) tupleValues[varPos]).getValue()).equals(((IntegerConstant) rhs).getValue());

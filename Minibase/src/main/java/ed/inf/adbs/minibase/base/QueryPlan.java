@@ -17,11 +17,19 @@ public class QueryPlan {
 
         DatabaseCatalog catalog = DatabaseCatalog.getCatalogInstance();
 
+        Rewriter rewriter = new Rewriter(query);
+        Query rewrittenQuery = rewriter.rewriteQuery();
+
+        rewrittenQuery.setBodyInfo();
+
+
         Head head = query.getHead();
 
         storeVariablePositions();
 
-        HashMap<Variable, String> verp = catalog.getVarRelations();
+        HashMap<Variable, String> varr = catalog.getVarRelations();
+        HashMap<Variable, Integer> varp = catalog.getVarPositions();
+        HashMap<String, HashMap<Variable, Integer>> varlp = catalog.getLocalVarPositions();
 
         List<Atom> body = rewriteBody();
 

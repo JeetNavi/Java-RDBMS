@@ -7,6 +7,7 @@ import java.util.Objects;
 public class Tuple {
 
     private Constant[] values;
+    private Variable[] variables;
 
     public Tuple (Constant[] values) {this.values = values;}
 

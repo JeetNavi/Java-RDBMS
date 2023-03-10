@@ -99,6 +99,10 @@ public class DatabaseCatalog {
 
     public HashMap<Variable, Integer> getVarPositions() {return varPositions;}
 
+    public HashMap<String, HashMap<Variable, Integer>> getLocalVarPositions() {
+        return localVarPositions;
+    }
+
     public void setVarRelation(Variable variable, String relation) {
 
         varRelations.put(variable, relation);
