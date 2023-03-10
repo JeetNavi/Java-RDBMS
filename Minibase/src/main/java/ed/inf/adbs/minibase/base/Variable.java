@@ -13,6 +13,10 @@ public class Variable extends Term {
         return name;
     }
 
+    public void changeName(String name) {
+        this.name = name;
+    }
+
     /**
      * Overriding equals. Variable objects should be equal if they have the same name.
      * @param o The object to be compared with.

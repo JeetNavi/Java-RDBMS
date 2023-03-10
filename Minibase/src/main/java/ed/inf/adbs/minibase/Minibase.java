@@ -32,23 +32,18 @@ public class Minibase {
         Query query = parseQuery(inputFile);
         assert query != null;
 
-        //QueryPlan queryPlan = new QueryPlan(query);
+        Rewriter rewriter = new Rewriter(query);
+        query = rewriter.rewriteQuery();
 
+        QueryPlan queryPlan = new QueryPlan(query);
+        Operator rootOperator = queryPlan.getRootOperator();
         // Plan could be null if there is a comparison atom that will never hold, i.e. 1=2.
-        //Operator plan = queryPlan.getPlan();
+        if (rootOperator != null) {
+            rootOperator.dump();
+        }
 
-        //if (plan != null){
-        //    plan.dump();
-        //}
+        int x = 5;
 
-        Operator scanU1 = new ScanOperator((RelationalAtom) query.getBody().get(0));
-        Operator scanU2 = new ScanOperator((RelationalAtom) query.getBody().get(1));
-
-        List<ComparisonAtom> conditions = Collections.singletonList((ComparisonAtom) query.getBody().get(2));
-        SelectionCondition joinCond = new SelectionCondition(conditions);
-        Operator join = new JoinOperator(scanU1, scanU2, joinCond);
-
-        join.dump();
     }
 
     /**
