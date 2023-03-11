@@ -59,15 +59,30 @@ public class QueryPlan {
 
 
         if (scansAndSelections.size() > 1) {
-            operator = new JoinOperator(scansAndSelections.get(0), scansAndSelections.get(1), new SelectionCondition(relationToJoinConditions.get(1)));
+            List<ComparisonAtom> joinCondition = relationToJoinConditions.get(1);
+            if (joinCondition == null) {
+                operator = new JoinOperator(scansAndSelections.get(0), scansAndSelections.get(1),  null);
+            } else {
+                operator = new JoinOperator(scansAndSelections.get(0), scansAndSelections.get(1), new SelectionCondition(joinCondition));
+            }
             for (int i = 2; i < scansAndSelections.size(); i++) {
-                operator = new JoinOperator(operator, scansAndSelections.get(i), new SelectionCondition(relationToJoinConditions.get(i)));
+                joinCondition = relationToJoinConditions.get(i);
+                if (joinCondition == null) {
+                    operator = new JoinOperator(operator, scansAndSelections.get(i), null);
+                } else {
+                    operator = new JoinOperator(operator, scansAndSelections.get(i), new SelectionCondition(joinCondition));
+                }
             }
         }
 
+        SumAggregate sumAggregate = query.getHead().getSumAggregate();
 
-        if (!query.getHead().getVariables().equals(usedVariables)){
-            operator = new ProjectOperator(operator, query.getHead());
+        if (sumAggregate == null) {
+            if (!query.getHead().getVariables().equals(usedVariables)){
+                operator = new ProjectOperator(operator, query.getHead());
+            }
+        } else {
+            operator = new SumOperator(sumAggregate, operator, query.getHead().getVariables());
         }
 
         return operator;

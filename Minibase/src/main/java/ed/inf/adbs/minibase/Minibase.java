@@ -35,14 +35,6 @@ public class Minibase {
         Rewriter rewriter = new Rewriter(query);
         query = rewriter.rewriteQuery();
 
-        Operator scan = new ScanOperator((RelationalAtom) query.getBody().get(0));
-        Operator sum = new SumOperator(query.getHead().getSumAggregate(), scan, query.getHead().getVariables());
-        Tuple t1 = sum.getNextTuple();
-        Tuple t2 = sum.getNextTuple();
-        Tuple t3 =  sum.getNextTuple();
-        //SumAggregate sa = query.getHead().getSumAggregate();
-
-
         QueryPlan queryPlan = new QueryPlan(query);
         Operator rootOperator = queryPlan.getRootOperator();
         // Plan could be null if there is a comparison atom that will never hold, i.e. 1=2.

@@ -24,23 +24,13 @@ public class SumOperator extends Operator{
         }
 
     private List<Tuple> computeAggregate() {
-        //List<Tuple> childTuples = new ArrayList<>();
+
         Tuple childTuple = childOperator.getNextTuple();
         HashMap<List<Constant>, Integer> groupedChildTuples = new HashMap<>();
         List<Term> sumAggregateTerms = sumAggregate.getProductTerms();
-        List<Variable> sumAggregateVariables = new ArrayList<>();
-        List<Variable> variables = new ArrayList<>();
 
-        for (Term term : sumAggregateTerms) {
-            if (term instanceof Variable) {
-                sumAggregateVariables.add((Variable) term);
-            }
-        }
-
-        variables.addAll(groups);
+        List<Variable> variables = new ArrayList<>(groups);
         variables.add(SUM_VARIABLE);
-        //variablesToKeep.addAll(groups);
-        //variablesToKeep.addAll(sumAggregateVariables);
 
         while (childTuple != null) {
             List<Constant> group = new ArrayList<>();
@@ -59,7 +49,6 @@ public class SumOperator extends Operator{
 
             }
             sumPut(groupedChildTuples, group, sumToAdd);
-            //.add(childTuple);
             childTuple = childOperator.getNextTuple();
         }
 

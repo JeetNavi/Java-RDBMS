@@ -13,6 +13,10 @@ public class SelectionCondition {
         this.conditions = conditions;
     }
 
+    public List<ComparisonAtom> getConditions() {
+        return conditions;
+    }
+
     public boolean evaluateOnTuple(Tuple tuple) {
 
         if (tuple == null) {
