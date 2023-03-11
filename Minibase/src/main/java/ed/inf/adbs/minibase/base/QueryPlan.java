@@ -7,15 +7,14 @@ import java.util.List;
 
 public class QueryPlan {
 
-    private Query query;
+    private final Query query;
     
-    private List<RelationalAtom> relationalAtoms;
-    private List<ComparisonAtom> comparisonAtoms;
-    private HashMap<Variable, Integer> variableToRelationNumber;
-    private List<String> relationsInOrder;
-    private HashMap<Integer, List<ComparisonAtom>> relationToSelectionConditions;
-    private HashMap<Integer, List<ComparisonAtom>> relationToJoinConditions;
-    private List<Variable> usedVariables;
+    private final List<RelationalAtom> relationalAtoms;
+    private final List<ComparisonAtom> comparisonAtoms;
+    private final HashMap<Variable, Integer> variableToRelationNumber;
+    private final HashMap<Integer, List<ComparisonAtom>> relationToSelectionConditions;
+    private final HashMap<Integer, List<ComparisonAtom>> relationToJoinConditions;
+    private final List<Variable> usedVariables;
 
 
     private Operator rootOperator;
@@ -27,11 +26,9 @@ public class QueryPlan {
         comparisonAtoms = new ArrayList<>();
         variableToRelationNumber = new HashMap<>();
 
-        relationsInOrder = new ArrayList<>();
         relationToJoinConditions = new HashMap<>();
         relationToSelectionConditions = new HashMap<>();
         usedVariables = new ArrayList<>();
-
 
         splitBody();
         storeVariableRelations();
@@ -106,11 +103,7 @@ public class QueryPlan {
                     appendPut(relationToSelectionConditions, lhsRelationNumber, comparisonAtom);
                 } else {
                     // Join condition with 2 relations.
-                    if (lhsRelationNumber > rhsRelationNumber) {
-                        appendPut(relationToJoinConditions, lhsRelationNumber, comparisonAtom);
-                    } else {
-                        appendPut(relationToJoinConditions, rhsRelationNumber, comparisonAtom);
-                    }
+                    appendPut(relationToJoinConditions, Math.max(lhsRelationNumber, rhsRelationNumber), comparisonAtom);
                 }
 
             } else if (lhs instanceof Variable && rhs instanceof Constant) {
@@ -147,12 +140,9 @@ public class QueryPlan {
 
     private void storeVariableRelations() {
         // Assumes split body
-        // Also stores relations in order into relationsInOrder.
         // Also stores variables in order into usedVariables.
         int relationCounter = 0;
         for (RelationalAtom relationalAtom : relationalAtoms) {
-            String relation = relationalAtom.getName();
-            relationsInOrder.add(relation);
             for (Term term : relationalAtom.getTerms()) {
                 // Term will be a distinct variable after rewriting.
                 variableToRelationNumber.put((Variable) term, relationCounter);
@@ -173,6 +163,7 @@ public class QueryPlan {
             }
         }
     }
+
     }
 
 

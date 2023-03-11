@@ -4,10 +4,10 @@ import java.util.*;
 
 public class Rewriter {
 
-    private Head head;
+    private final Head head;
     private List<RelationalAtom> relationalAtoms;
-    private List<ComparisonAtom> comparisonAtoms;
-    private List<Variable> usedVariables;
+    private final List<ComparisonAtom> comparisonAtoms;
+    private final List<Variable> usedVariables;
 
     public Rewriter(Query query) {
         List<Atom> body = query.getBody();

@@ -67,7 +67,4 @@ public class RelationalAtom extends Atom {
         return new RelationalAtom(name, mappedTerms);
     }
 
-    public void changeTerms(List<Term> newTerms) {
-        terms = newTerms;
-    }
 }
