@@ -1,3 +1,1 @@
-Q(a, b, c) :- R(a, b, c), S(d, e, b), U(g, g, a), e = d, e = 2
-
-
+Q(x, SUM(3)) :- R(x, y, z)
