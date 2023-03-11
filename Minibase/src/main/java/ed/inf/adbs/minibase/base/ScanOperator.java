@@ -62,7 +62,23 @@ public class ScanOperator extends Operator{
 
     }
 
-    public String getBaseRelation() {
-        return baseRelation;
+    private Tuple toTuple(String tupleString, List<Variable> variables) {
+        String[] tupleSplit = tupleString.split(", |,");
+        Constant[] tupleValues = new Constant[tupleSplit.length];
+
+        int counter = 0;
+
+        for (String constString : tupleSplit) {
+            if (constString.charAt(0) == '\'') {
+                constString = constString.substring(1, constString.length() - 1);
+                tupleValues[counter] = new StringConstant(constString);
+            }
+            else {
+                tupleValues[counter] = new IntegerConstant(Integer.parseInt(constString));
+            }
+            counter += 1;
+        }
+
+        return new Tuple(tupleValues, variables);
     }
 }

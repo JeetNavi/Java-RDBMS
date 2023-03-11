@@ -1,18 +1,28 @@
 package ed.inf.adbs.minibase.base;
 
-import java.util.HashMap;
-import java.util.List;
-
+/**
+ * Superclass for all operator types.
+ */
 public abstract class Operator {
 
-    //public static HashMap<Variable, Integer> varPositions = new HashMap<>();
-
+    /**
+     * Abstract method for getNextTuple.
+     * Allows each subclass operator to implement their own ways of getting the next tuple.
+     * @return Tuple object. The next tuple of the corresponding operator.
+     */
     public abstract Tuple getNextTuple();
 
+    /**
+     * Abstract method for reset.
+     * Allows each subclass operator to implement their own ways of resetting.
+     * This ultimately will reset the scanner of a scan operator.
+     */
     public abstract void reset();
 
-    //private HashMap<Term, Integer> positionOfTerms
-
+    /**
+     * Dump method for operators.
+     * Calls getNextTuple repeatedly until the next tuple is null, i.e., there are no more satisfying tuples.
+     */
     public void dump() {
 
         Tuple nextTuple;
@@ -30,27 +40,4 @@ public abstract class Operator {
 
     }
 
-    public Tuple toTuple(String tupleString, List<Variable> variables) {
-        String[] tupleSplit = tupleString.split(", |,");
-        Constant[] tupleValues = new Constant[tupleSplit.length];
-
-        int counter = 0;
-
-        for (String constString : tupleSplit) {
-            if (constString.charAt(0) == '\'') {
-                constString = constString.substring(1, constString.length() - 1);
-                tupleValues[counter] = new StringConstant(constString);
-            }
-            else {
-                tupleValues[counter] = new IntegerConstant(Integer.parseInt(constString));
-            }
-            counter += 1;
-        }
-
-        return new Tuple(tupleValues, variables);
-    }
-
-    public void addPositionOfTerm(Term term, int pos) {
-
-    }
 }
