@@ -15,6 +15,7 @@ public class QueryPlan {
     private List<String> relationsInOrder;
     private HashMap<Integer, List<ComparisonAtom>> relationToSelectionConditions;
     private HashMap<Integer, List<ComparisonAtom>> relationToJoinConditions;
+    private List<Variable> usedVariables;
 
 
     private Operator rootOperator;
@@ -29,6 +30,7 @@ public class QueryPlan {
         relationsInOrder = new ArrayList<>();
         relationToJoinConditions = new HashMap<>();
         relationToSelectionConditions = new HashMap<>();
+        usedVariables = new ArrayList<>();
 
 
         splitBody();
@@ -41,6 +43,35 @@ public class QueryPlan {
     }
 
     private Operator buildQueryPlan() {
+        List<Operator> scansAndSelections = new ArrayList<>();
+
+        Operator operator = null;
+        int atomCounter = 0;
+        for (RelationalAtom relationalAtom : relationalAtoms) {
+            operator = new ScanOperator(relationalAtom);
+            List<ComparisonAtom> selectionConditions = relationToSelectionConditions.get(atomCounter);
+            if (selectionConditions != null) {
+                operator = new SelectOperator(new SelectionCondition(selectionConditions), operator);
+            }
+            atomCounter += 1;
+            scansAndSelections.add(operator);
+        }
+
+
+        if (scansAndSelections.size() > 1) {
+            operator = new JoinOperator(scansAndSelections.get(0), scansAndSelections.get(1), new SelectionCondition(relationToJoinConditions.get(1)));
+            for (int i = 2; i < scansAndSelections.size(); i++) {
+                operator = new JoinOperator(operator, scansAndSelections.get(i), new SelectionCondition(relationToJoinConditions.get(i)));
+            }
+        }
+
+
+        if (!query.getHead().getVariables().equals(usedVariables)){
+            operator = new ProjectOperator(operator, query.getHead());
+        }
+
+        return operator;
+
     }
 
     public Operator getRootOperator() {
@@ -91,7 +122,7 @@ public class QueryPlan {
     }
 
     private void appendPut(HashMap<Integer, List<ComparisonAtom>> map, int relationNumber, ComparisonAtom atomToAppend) {
-        List<ComparisonAtom> currentConditions = map.getOrDefault(relationNumber, null);
+        List<ComparisonAtom> currentConditions = map.get(relationNumber);
         if (currentConditions == null) {
             currentConditions = new ArrayList<>();
         }
@@ -101,7 +132,8 @@ public class QueryPlan {
 
     private void storeVariableRelations() {
         // Assumes split body
-        // Also stores relations in order
+        // Also stores relations in order into relationsInOrder.
+        // Also stores variables in order into usedVariables.
         int relationCounter = 0;
         for (RelationalAtom relationalAtom : relationalAtoms) {
             String relation = relationalAtom.getName();
@@ -109,6 +141,7 @@ public class QueryPlan {
             for (Term term : relationalAtom.getTerms()) {
                 // Term will be a distinct variable after rewriting.
                 variableToRelationNumber.put((Variable) term, relationCounter);
+                usedVariables.add((Variable) term);
             }
             relationCounter += 1;
         }
