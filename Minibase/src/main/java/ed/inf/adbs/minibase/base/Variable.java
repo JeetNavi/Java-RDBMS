@@ -13,6 +13,11 @@ public class Variable extends Term {
         return name;
     }
 
+    /**
+     * Method to change the name of the variables.
+     * Used to make rewriting queries easier.
+     * @param name New name.
+     */
     public void changeName(String name) {
         this.name = name;
     }
