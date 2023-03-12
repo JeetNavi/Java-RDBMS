@@ -23,21 +23,23 @@ public abstract class Operator {
      * Dump method for operators.
      * Calls getNextTuple repeatedly until the next tuple is null, i.e., there are no more satisfying tuples.
      */
-    public void dump() {
+    public String dump() {
 
         Tuple nextTuple;
+        String results = "";
 
         while (true) {
 
             nextTuple = getNextTuple();
             if (!(nextTuple == null)) {
+                results = results + nextTuple + '\n';
                 System.out.println(nextTuple);
             }
             else {
                 break;
             }
         }
-
+        return results;
     }
 
 }
