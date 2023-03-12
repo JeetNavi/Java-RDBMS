@@ -3,7 +3,7 @@ Implementation of the minimization procedure for conjunctive queries and a light
 
 ## README file
 
-#### Extracting join conditions from the body of a query 
+### Extracting join conditions from the body of a query 
 This is done in my QueryPlan class, specifically in the groupComparisonAtoms method.  
 In order to explain my way of extracting join conditions i will go through an example:  
 
@@ -37,3 +37,16 @@ The join condition w=x is assigned to RA number 1; the join condition is between
 The join condition x=z is assigned to the RA number 3; the join condition is between ABC and D.  
 
 Note that in CQ: Q(w,x,y,z) :- A(w), B(x), C(y), D(z), w=x, x=z. There is no join condition between AB and C, so this ends up being a cartesian product.  
+
+
+### Explanation of optimisation
+
+I apply any and all selection conditions on individual relational atoms before applying any joins, so we filter as early as possible.  
+This is correct because the output tuples will not change if we perform individual selection conditions at different times in the plan.
+This is better because selections are essentially free wheras joins are expensive.  
+So the intermediate inputs to joins are smaller when we apply selection conditions at the beginning.  
+
+If there are multiple selection conditions on an individual relation, this is one-by-one rather than a large conjunction (sigma cascade).
+The reason why this is correct is because selection is cascadable and commutative.
+This is better as we are applying each outer seleciton on a fewer set of input tuples as we apply more inner selections.
+
