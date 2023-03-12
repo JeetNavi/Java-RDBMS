@@ -38,6 +38,7 @@ public class SelectionCondition {
         boolean conditionHolds = false;
 
         for (ComparisonAtom comparisonAtom : conditions) {
+            // We evaluate each condition one-by-one rather than one big conjunction.
 
             switch (comparisonAtom.getOp()) {
                 case EQ:
