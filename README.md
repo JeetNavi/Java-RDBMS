@@ -4,8 +4,8 @@ Implementation of the minimization procedure for conjunctive queries and a light
 ## README file
 
 #### Extracting join conditions from the body of a query 
-This is done in my QueryPlan class, specifically in the groupComparisonAtoms method.
-  In order to explain my way of extracting join conditions i will go through an example:
+This is done in my QueryPlan class, specifically in the groupComparisonAtoms method.  
+In order to explain my way of extracting join conditions i will go through an example:  
 
 We must construct a left deep plan.
 So for the CQ: Q(w,x,y,z) :- A(w), B(x), C(y), D(z)
