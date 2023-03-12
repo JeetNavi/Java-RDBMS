@@ -41,13 +41,18 @@ Note that in CQ: Q(w,x,y,z) :- A(w), B(x), C(y), D(z), w=x, x=z. There is no joi
 
 ### Explanation of optimisation
 
-I apply any and all selection conditions on individual relational atoms before applying any joins, so we filter as early as possible.  
+* I apply any and all selection conditions on individual relational atoms before applying any joins, so we filter as early as possible.  
 This is correct because the output tuples will not change if we perform individual selection conditions at different times in the plan.
 This is better because selections are essentially free wheras joins are expensive.  
 So the intermediate inputs to joins are smaller when we apply selection conditions at the beginning.  
 
-If there are multiple selection conditions on an individual relation, this is one-by-one rather than a large conjunction (sigma cascade).
-The reason why this is correct is because selection is cascadable and commutative.
-This is better as we are applying each outer seleciton on a fewer set of input tuples as we apply more inner selections.
+* If there are multiple selection conditions on an individual relation, this is one-by-one rather than a large conjunction (sigma cascade).  
+The reason why this is correct is because selection is cascadable and commutative.  
+This is better as we are applying each outer seleciton on a fewer set of input tuples as we apply more inner selections.  
 
-Because we are instructed to create a left deep plan, i was not able to apply optimisations on the joins.
+* Because we are instructed to create a left deep plan, i was not able to apply optimisations on the joins.  
+
+We also make some optimisations by rewriting. The following are all correct because they create equivalent CQ's, it is just simplified.  
+The query rewriter applies heuristics & RA rules, without looking into the actual database state (no info about cardinalities, indices, etc.)  
+
+* If we see a comparison atom consisting of only constants, We can remove it from the body if it is always true. If it is always false, we can stop early because there will be no output tuples.  
