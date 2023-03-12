@@ -1,22 +1,34 @@
 package ed.inf.adbs.minibase.base;
 
-import java.util.HashMap;
 import java.util.List;
 
+/**
+ * SelectionCondition class.
+ * A SelectionCondition object is made up of a list of comparison atoms, i.e., a list of selection conditions.
+ * This class provides a method to evaluate a tuple on a selection condition.
+ */
 public class SelectionCondition {
 
-    private List<ComparisonAtom> conditions;
+    // The comparison atoms / conditions of the selection condition.
+    private final List<ComparisonAtom> conditions;
 
-    private DatabaseCatalog catalog = DatabaseCatalog.getCatalogInstance();
-
+    /**
+     * Constructor of SelectionCondition.
+     * Assigns conditions.
+     * @param conditions The comparison atoms that are the selection conditions (of a single relation).
+     */
     public SelectionCondition(List<ComparisonAtom> conditions) {
         this.conditions = conditions;
     }
 
-    public List<ComparisonAtom> getConditions() {
-        return conditions;
-    }
-
+    /**
+     * Method that can be publicly used to evaluate a SelectionCondition on a tuple.
+     * I.e., for the selection condition containing one condition: x<y, with the tuple (1, 2) (with variables (x, y)),
+     * this method will return true because 1<2 (x<y).
+     * If there are multiple conditions, all conditions will be considered on the tuple.
+     * @param tuple The tuple to evaluate the conditions on.
+     * @return true if all the conditions hold on the tuple, false otherwise.
+     */
     public boolean evaluateOnTuple(Tuple tuple) {
 
         if (tuple == null) {
@@ -61,6 +73,15 @@ public class SelectionCondition {
         return true; // All conditions hold on the tuple.
     }
 
+    /**
+     * Helper method for evaluateOnTuple.
+     * This method is used if one of the conditions contains the "less than" operator.
+     * Or if the condition contains an operator that can be simplified to use a combination of operators including "less than".
+     * This method evaluates the tuple based on the one comparison atom.
+     * @param tuple The tuple to evaluate the "less than" condition on.
+     * @param comparisonAtom The "less than" condition.
+     * @return true if the "less than" condition holds on the tuple, false otherwise.
+     */
     private boolean evaluateConditionLT(Tuple tuple, ComparisonAtom comparisonAtom) {
         Term lhs = comparisonAtom.getTerm1();
         Term rhs = comparisonAtom.getTerm2();
@@ -122,6 +143,15 @@ public class SelectionCondition {
 
     }
 
+    /**
+     * Helper method for evaluateOnTuple.
+     * This method is used if one of the conditions contains the "greater than" operator.
+     * Or if the condition contains an operator that can be simplified to use a combination of operators including "greater than".
+     * This method evaluates the tuple based on the one comparison atom.
+     * @param tuple The tuple to evaluate the "greater than" condition on.
+     * @param comparisonAtom The "greater than" condition.
+     * @return true if the "greater than" condition holds on the tuple, false otherwise.
+     */
     private boolean evaluateConditionGT(Tuple tuple, ComparisonAtom comparisonAtom) {
         Term lhs = comparisonAtom.getTerm1();
         Term rhs = comparisonAtom.getTerm2();
@@ -182,6 +212,15 @@ public class SelectionCondition {
 
     }
 
+    /**
+     * Helper method for evaluateOnTuple.
+     * This method is used if one of the conditions contains the "equals" operator.
+     * Or if the condition contains an operator that can be simplified to use a combination of operators including "equals".
+     * This method evaluates the tuple based on the one comparison atom.
+     * @param tuple The tuple to evaluate the "equals" condition on.
+     * @param comparisonAtom The "equals" condition.
+     * @return true if the "equals" condition holds on the tuple, false otherwise.
+     */
     private boolean evaluateConditionEQ(Tuple tuple, ComparisonAtom comparisonAtom) {
         Term lhs = comparisonAtom.getTerm1();
         Term rhs = comparisonAtom.getTerm2();
@@ -248,12 +287,6 @@ public class SelectionCondition {
         }
 
     }
-
-    public void addCondition(ComparisonAtom condition) {
-        conditions.add(condition);
-    }
-
-
 
 }
 
