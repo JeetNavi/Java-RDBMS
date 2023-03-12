@@ -29,8 +29,8 @@ previous relational atom (which may already be joined).
 For instance, in CQ: Q(w,x,y,z) :- A(w), B(x), C(y), D(z), w=x, x=y.  
 We assign the join condition x=y to the relational atom C because it is the join condition for AB and C.  
 The way i work this out is by **choosing the maximum of the 2 RA numbers**.  
-For instance, in x=y, with RA number of x being 1 and RA number of y being 2, since y's RA number is greater than x's RA number (2>1), we assign the   
-join condition to y's relational atom.  
+For instance, in x=y, with RA number of x being 1 and RA number of y being 2, since y's RA number is greater than x's RA number (2>1),  
+we assign the join condition to y's relational atom.  
 
 So in the CQ: Q(w,x,y,z) :- A(w), B(x), C(y), D(z), w=x, x=z.  
 The join condition w=x is assigned to RA number 1; the join condition is between A and B.  
