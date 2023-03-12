@@ -50,3 +50,4 @@ If there are multiple selection conditions on an individual relation, this is on
 The reason why this is correct is because selection is cascadable and commutative.
 This is better as we are applying each outer seleciton on a fewer set of input tuples as we apply more inner selections.
 
+Because we are instructed to create a left deep plan, i was not able to apply optimisations on the joins.
