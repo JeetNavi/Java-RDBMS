@@ -33,7 +33,6 @@ public abstract class Operator {
             nextTuple = getNextTuple();
             if (!(nextTuple == null)) {
                 results = results + nextTuple + '\n';
-                System.out.println(nextTuple);
             }
             else {
                 break;

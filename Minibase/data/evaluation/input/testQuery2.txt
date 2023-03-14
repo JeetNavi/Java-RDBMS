@@ -1,1 +1,1 @@
-Q(z) :- U(8, 9, z), z != 'rl'
+Q(x,y,c) :- R(x, y, 'adbs'), R(1, y, c)

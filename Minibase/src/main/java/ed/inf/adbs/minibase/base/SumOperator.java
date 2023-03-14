@@ -52,7 +52,7 @@ public class SumOperator extends Operator{
         }
 
     /**
-     * Method that reads all the child tuples, does the aggregation, and returns the results of the aggregation as a list of tuples.
+     * Method that reads the child tuples, does the aggregation (on the fly), and returns the results of the aggregation as a list of tuples.
      * This method is used upon constructing a SumOperator object, so it is used only once for each SumOperator object.
      * This is because we only need to compute the aggregation once and store the results, then we can call getNextTuple repeatedly to pull
      * results from the results list one by one.
