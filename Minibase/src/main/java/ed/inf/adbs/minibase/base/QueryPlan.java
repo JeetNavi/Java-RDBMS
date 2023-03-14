@@ -66,7 +66,7 @@ public class QueryPlan {
 
     /**
      * Method used to build a query plan from the query.
-     * More information in code comments and README.
+     * More information in code line comments.
      * @return Root operator; the query plan.
      */
     private Operator buildQueryPlan() {
