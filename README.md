@@ -56,3 +56,12 @@ We also make some optimisations by rewriting. The following are all correct beca
 The query rewriter applies heuristics & RA rules, without looking into the actual database state (no info about cardinalities, indices, etc.)  
 
 * If we see a comparison atom consisting of only constants, We can remove it from the body if it is always true. If it is always false, we can stop early because there will be no output tuples.  
+
+Finally, my sumOperator is optimised such that it doesn't need to have all of the child tuples in a buffer.  
+Instead, it only needs 1 child tuple in a buffer (essentially there is no buffer).  
+What we do is we maintain a mapping from groups to current sums.  
+We then look at the child tuple and see if the group this child tuple belongs to is currently a key in this hashmap.  
+If it is a key in the hashmap, we update the corresponding sum value accordingly (by adding to it).  
+If it is not a key in the hashmap, we insert the key and insert the initial sum (which depends on the sum aggregate).  
+We then get the next child tuple and repeat.  
+This way we do not need to maintain any buffer, so there is no chance of us running out of space in main memory here!  
