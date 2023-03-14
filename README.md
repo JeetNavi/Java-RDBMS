@@ -46,12 +46,12 @@ This is explained with code line comments in my buildQueryPlan() method in my Qu
 
 * I apply any and all selection conditions on individual relational atoms before applying any joins, so we filter as early as possible.  
 This is correct because the output tuples will not change if we perform individual selection conditions at different times in the plan.
-This is better because selections are essentially free wheras joins are expensive.  
+This is better because selections are essentially free whereas joins are expensive.  
 So the intermediate inputs to joins are smaller when we apply selection conditions at the beginning.  
 
 * If there are multiple selection conditions on an individual relation, this is one-by-one rather than a large conjunction (sigma cascade).  
 The reason why this is correct is because selection is cascadable and commutative.  
-This is better as we are applying each outer seleciton on a fewer set of input tuples as we apply more inner selections.  
+This is better as we are applying each outer selection on a fewer set of input tuples as we apply more inner selections.  
 
 * Because we are instructed to create a left deep plan, i was not able to apply optimisations on the joins.  
 
