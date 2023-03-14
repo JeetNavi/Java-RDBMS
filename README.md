@@ -65,3 +65,4 @@ If it is a key in the hashmap, we update the corresponding sum value accordingly
 If it is not a key in the hashmap, we insert the key and insert the initial sum (which depends on the sum aggregate).  
 We then get the next child tuple and repeat.  
 This way we do not need to maintain any buffer, so there is no chance of us running out of space in main memory here!  
+This is correct because of the properties of sum. We are able to keep temporary values and update it until there is no more to add.  
