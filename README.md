@@ -38,6 +38,9 @@ The join condition x=z is assigned to the RA number 3; the join condition is bet
 
 Note that in CQ: Q(w,x,y,z) :- A(w), B(x), C(y), D(z), w=x, x=z. There is no join condition between AB and C, so this ends up being a cartesian product.  
 
+### Explanation of building query plan.  
+
+This is explained with code line comments in my buildQueryPlan() method in my QueryPlan class.  
 
 ### Explanation of optimisation
 
